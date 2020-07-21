@@ -1,0 +1,94 @@
+﻿@model IEnumerable<BoniStreaming.Models.Customer>
+
+@{
+    ViewBag.Title = "Customers";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<h2>Customers</h2>
+
+<p>
+    @Html.ActionLink("Create New", "Create", "Customer")
+</p>
+
+<table id="customers" class="table table-bordered table-hover dataTable no-footer">
+    <thead>
+        <tr>
+            <th>Customer</th>
+            <th>Membership Type</th>
+            <th>Delete</th>
+        </tr>
+    </thead>
+    <tbody>
+    </tbody>
+</table>
+
+@section Scripts
+{
+    @Scripts.Render("~/bundles/lib")
+    @Scripts.Render("~/Content/css")
+
+    <script src="/Scripts/jquery-3.4.1.js"></script>
+    <script src="/Scripts/bootstrap.js"></script>
+    <script src="/Scripts/bootbox.js"></script>
+    <script src="/Scripts/respond.js"></script>
+    <script src="/Scripts/DataTables/jquery.dataTables.js"></script>
+    <script src="/Scripts/DataTables/dataTables.bootstrap.js"></script>
+    <script src="/Content/Site.css"></script>
+
+
+    <script>
+
+        $(document).ready(function() {
+
+            var table = $("#customers").DataTable({
+                ajax: {
+                    url: "/api/customers",
+                    dataSrc: ""
+                },
+                columns: [
+                    {
+                        data: "name",
+                        render: function(data, type, customer) {
+                            return "<a href='https://localhost:44398/customer/edit/" + customer.id + "'>" + customer.name + "</a>";
+                        }
+                    },
+                    {
+                        data: "membershipTypeName"
+                    },
+                    {
+                        data: "id",
+                        render: function(data) {
+                            return "<button class='btn-link js-delete' data-customer-id=" + data + ">Delete</button";
+                        }
+                    }
+                ]
+            });
+
+            $("#customers").on("click",
+                ".js-delete",
+                function() {
+
+                    var button = $(this);
+
+                    bootbox.confirm("Queres mesmo?",
+                        function(result) {
+
+                            if (result) {
+
+                                $.ajax({
+                                    url: "https://localhost:44398/api/customers/" + button.attr("data-customer-id"),
+                                    method: "DELETE",
+                                    success: function() {
+                                        table.row(button.parents("tr")).remove().draw();
+                                    }
+                                });
+                            }
+                        });
+                });
+        });
+
+    </script>
+}
+
+

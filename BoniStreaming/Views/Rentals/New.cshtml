@@ -1,0 +1,157 @@
+﻿@model dynamic
+
+@{
+    ViewBag.Title = "New Rental Form";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<h2>New Rental</h2>
+
+<form id="newRental">
+    <div class="form-group">
+        <label>Customer</label>
+
+        <div class="tt-container">
+            <input id="customer" data-rule-validCustomer="true" required type="text" value="" class="form-control" />
+        </div>
+    </div>
+
+    <div class="form-group">
+        <label>Movie</label>
+
+        <div class="tt-container">
+            <input id="movie" data-rule-oneMovie="true" required type="text" value="" class="form-control" />
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="col-md-4 col-sm-4">
+            <ul id="movies" class="list-group"></ul>
+        </div>
+    </div>
+
+    <button class="rentMovies btn btn-primary">Submit</button>
+</form>
+
+
+@section scripts
+{
+    @Scripts.Render("~/bundles/lib")
+    @Scripts.Render("~/Content/css")
+    @Scripts.Render("~/bundles/js")
+    @Scripts.Render("~/bundles/jqueryval")
+
+
+    <script src="/Scripts/jquery-3.4.1.js"></script>
+    <script src="/Scripts/bootstrap.js"></script>
+    <script src="/Content/Site.css"></script>
+    <script src="/Scripts/typeahead.bundle.js"></script>
+    <script src="/Scripts/typeahead.jquery.js"></script>
+    <script src="/Scripts/bloodhound.js"></script>
+    <script src="/Content/typeahead.css"></script>
+    <script src="/Scripts/bloodhound.js"></script>
+    <script src="~/Scripts/jquery.validate-vsdoc.js"></script>
+    <script src="~/Scripts/jquery.validate.js"></script>
+    <script src="~/Scripts/jquery.validate.min.js"></script>
+    <script src="~/Scripts/jquery.validate.unobtrusive.js"></script>
+    <script src="~/Scripts/jquery.validate.unobtrusive.min.js"></script>
+
+    <script>
+
+        $(document).ready(function () {
+
+            var vm = {
+                MovieIds: []
+            };
+
+            var customers = new Bloodhound({
+                datumTokenizer: Bloodhound.tokenizers.obj.whitespace('name'),
+                queryTokenizer: Bloodhound.tokenizers.whitespace,
+                remote: {
+                    url: '/api/customers?query=%QUERY',
+                    wildcard: '%QUERY'
+                }
+            });
+
+
+            var movies = new Bloodhound({
+                datumTokenizer: Bloodhound.tokenizers.obj.whitespace('name'),
+                queryTokenizer: Bloodhound.tokenizers.whitespace,
+                remote: {
+                    url: '/api/movies?query=%QUERY',
+                    wildcard: '%QUERY'
+                }
+            });
+
+
+            $('#customer').typeahead({
+                minLength: 3,
+                highlight: true
+            }, {
+                name: 'customers',
+                display: 'name',
+                source: customers
+            }).on("typeahead:select", function (e, customer) {
+                vm.CustomerID = customer.id;
+            });
+
+
+
+            $('#movie').typeahead({
+                minLength: 3,
+                highlight: true
+            }, {
+                name: 'movies',
+                display: 'name',
+                source: movies
+            }).on("typeahead:select", function (e, movie) {
+
+                $('#movies').append("<li class='list-group-item'>" + movie.name + "</li>");
+
+                $('#movie').typeahead("val", "");
+
+                vm.MovieIds.push(movie.id);
+            });
+
+
+            $.validator.addMethod("validCustomer", function () {
+                return vm.CustomerID && vm.CustomerID !== 0;
+
+            }, "Please select a valid customer");
+
+            $.validator.addMethod("oneMovie", function () {
+                return vm.MovieIds.length > 0;
+
+            }, "Please choose at least one movie");
+
+
+            var validator = $("#newRental").validate({
+                submitHandler: function() {
+
+                    $.ajax({
+                        url: "https://localhost:44398/api/newrentals/",
+                        method: "post",
+                        data: vm
+                    })
+                        .done(function () {
+                            toastr.success("Rentals recorded");
+
+                            $("#customer").typeahead("val", "");
+                            $("#movie").typeahead("val", "");
+                            $("#movies").empty();
+
+                            vm = { MovieIds: [] };
+    
+                            validator.resetForm();
+                        })
+                        .fail(function () {
+                            toastr.error("Something went wrong");
+                        });
+                }
+            });
+
+        });
+
+    </script>
+
+}

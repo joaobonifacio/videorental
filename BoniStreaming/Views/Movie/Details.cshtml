@@ -1,0 +1,44 @@
+﻿@model BoniStreaming.ViewModels.MovieFormViewModel
+
+@{
+    ViewBag.Title = "Details";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<h2>Details</h2>
+
+
+<div>
+
+    <dl class="dl-horizontal">
+        <dt>
+            @Html.DisplayNameFor(model => model.movie.Name)
+        </dt>
+        <dd>
+            @Html.DisplayFor(model => model.movie.Name)
+        </dd>
+        <dt>
+            @Html.DisplayNameFor(model => model.movie.GenreId)
+        </dt>
+        <dd>
+            @Html.DisplayFor(model => model.genreName)
+        </dd>
+        <dt>
+            @Html.DisplayNameFor(model => model.movie.ReleaseDate)
+        </dt>
+        <dd>
+            @Html.DisplayFor((model => model.movie.ReleaseDate))
+        </dd>
+        <dt>
+            @Html.DisplayNameFor(model => model.movie.DateAdded)
+        </dt>
+        <dd>
+            @Html.DisplayFor((model => model.movie.DateAdded))
+        </dd>
+    </dl>
+</div>
+
+<p>
+    @Html.ActionLink("Edit", "Edit", new { id = Model.movie.Id }) |
+    @Html.ActionLink("Back to List", "Index")
+</p>

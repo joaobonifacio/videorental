@@ -1,0 +1,122 @@
+﻿@model IEnumerable<BoniStreaming.Models.Movie>
+
+@{
+    ViewBag.Title = "Index";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<h2>Movies</h2>
+
+<p>
+    @Html.ActionLink("Create New", "Create")
+</p>
+
+<table id="movies" class="table table-bordered table-hover dataTable no-footer">
+    <thead>
+        <tr>
+            <th>Name</th>
+            <th>Genre Name</th>
+            <th>Release Date</th>
+            <th>Date Added</th>
+            <th>Number In Stock</th>
+            <th>Delete</th>
+        </tr>
+    </thead>
+    <tbody>
+    </tbody>
+</table>
+
+@section Scripts
+{
+    @Scripts.Render("~/bundles/lib")
+    @Scripts.Render("~/Content/css")
+
+    <script src="/Scripts/jquery-3.4.1.js"></script>
+    <script src="/Scripts/bootstrap.js"></script>
+    <script src="/Scripts/bootbox.js"></script>
+    <script src="/Scripts/respond.js"></script>
+    <script src="/Scripts/DataTables/jquery.dataTables.js"></script>
+    <script src="/Scripts/DataTables/dataTables.bootstrap.js"></script>
+    <script src="/Content/Site.css"></script>
+
+
+    <script>
+
+        $(document).ready(function() {
+
+            var table = $("#movies").DataTable({
+                ajax: {
+                    url: "/api/movies/",
+                    dataSrc: ""
+                },
+                columns: [
+                    {
+                        data: "name",
+                        render: function(data, type, movie) {
+                            return "<a href='https://localhost:44398/movie/edit/" + movie.id + "'>" + movie.name + "</a>";
+                        }
+                    },
+                    {
+                        data: "genreName",
+                        render: function(data) {
+                            return data;
+                        }
+                    },
+                    {
+                        data: "releaseDate",
+                        render:
+                            function(data) {
+                                return data;
+                            }
+                    },
+                    {
+                        data: "dateAdded",
+                        render:
+                            function(data) {
+                                return data;
+                            }
+                    },
+                    {
+                        data: "numberInStock",
+                        render:
+                            function(data) {
+                                return data;
+                            }
+                    },
+                    {
+                        data: "id",
+                        render:
+                            function(data) {
+                                return "<button class='btn-link js-delete' data-movie-id=" + data + ">Delete</button";
+                            }
+                    }
+                ]
+            });
+
+            $("#movies").on("click",
+                ".js-delete",
+                function() {
+
+                    var button = $(this);
+
+                    bootbox.confirm("Queres mesmo?",
+                        function(result) {
+
+                            if (result) {
+
+                                $.ajax({
+                                    url: "https://localhost:44398/api/movies/" + button.attr("data-movie-id"),
+                                    method: "DELETE",
+                                    success: function() {
+                                        table.row(button.parents("tr")).remove().draw();
+                                    }
+                                });
+                            }
+                        });
+                });
+        });
+
+    </script>
+}
+
+
